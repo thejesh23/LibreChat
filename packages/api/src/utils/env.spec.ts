@@ -588,6 +588,26 @@ describe('resolveHeaders', () => {
     expect(result.Authorization).toBe('Bearer ${TEST_API_KEY}');
   });
 
+  it('should insert values containing `$` replacement patterns literally', () => {
+    const user = createTestUser({ name: 'A$&B' });
+    const customUserVars = { MY_TOKEN: 'sk-abc$$def', SUFFIX: "x$'y" };
+    const body = { conversationId: 'c$`1', parentMessageId: 'p', messageId: 'm' };
+    const headers = {
+      Authorization: 'Bearer {{MY_TOKEN}}',
+      'X-Tail': '{{SUFFIX}}-end',
+      'X-Name': '{{LIBRECHAT_USER_NAME}}',
+      'X-Conversation': 'pre-{{LIBRECHAT_BODY_CONVERSATIONID}}',
+    };
+    const result = resolveHeaders({ headers, user, body, customUserVars });
+
+    expect(result).toEqual({
+      Authorization: 'Bearer sk-abc$$def',
+      'X-Tail': "x$'y-end",
+      'X-Name': 'A$&B',
+      'X-Conversation': 'pre-c$`1',
+    });
+  });
+
   describe('non-string header values (type guard tests)', () => {
     it('should handle numeric header values without crashing', () => {
       const headers = {

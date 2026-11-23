@@ -493,6 +493,15 @@ describe('OpenID Token Utilities', () => {
       expect(result).toBe('Name: Test User');
     });
 
+    it('should insert values containing `$` replacement patterns literally', () => {
+      const tokenInfo = { userName: 'A$&B', userEmail: "x$'y@example.com" };
+
+      const input = '{{LIBRECHAT_OPENID_USER_NAME}} <{{LIBRECHAT_OPENID_USER_EMAIL}}>';
+      const result = processOpenIDPlaceholders(input, tokenInfo);
+
+      expect(result).toBe("A$&B <x$'y@example.com>");
+    });
+
     it('should replace multiple placeholders in a single string', () => {
       const tokenInfo = {
         accessToken: 'access-token-value',
